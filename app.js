@@ -2,6 +2,7 @@
 const newVacationFormElement = document.getElementsByTagName("form")[0];
 const startDateInputElement = document.getElementById("start-date");
 const endDateInputElement = document.getElementById("end-date");
+const pastVacationContainer = document.getElementById('past-vacations');
 
 
 //listen to form submissions
@@ -62,3 +63,62 @@ function storeNewVacation(startDate, endDate){
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(vacations));
 
 } //storeNewVacation
+
+function getAllStoredVacations(){
+    //get the string of vacation from local storage
+    const data = window.localStorage.getItem(STORAGE_KEY);
+
+    //if no vacations are stored, default to an empty array
+    //otherwise return the stored data (JSON string) as parsed JSON
+
+    // using a turnary operator (if then else) and returns a val
+    const vacations = data ? JSON.parse(data) : [];
+    //                does data exist; ? then; parse the data; : else; empty string
+
+
+    return vacations;
+
+} //getAllStoredVacations
+
+function renderPastVacations(){
+
+    //get the parsed string of vacations or an empty array if there aren't any
+    const vacations = getAllStoredVacations();
+
+    //exit if there aren't any vacations
+    if (vacations.length === 0) {
+        return;
+    }
+
+    //clear the list of past vacations since we're going to rerender it
+    pastVacationContainer.innerHTML = "";
+    const pastVacationHeader = document.createElement("h2");
+    pastVacationHeader.textContent = "Past Vacations";
+
+    const pastVacationList = document.createElement("ul");
+
+    //loop over all vacations and render them
+    vacations.forEach((vacation) => {
+        const vacationEl = document.createElement("li");
+        vacationEl.textContent = `From ${formatDate(vacation.startDate)} 
+        to ${formatDate(vacation.endDate)}`;
+        pastVacationList.appendChild(vacationEl);
+    });
+
+    pastVacationContainer.appendChild(pastVacationHeader);
+    pastVacationContainer.appendChild(pastVacationList);
+} //renderPastVacations
+
+function formatDate(dateString){
+    //convert the string to a date object
+    const date = new Date(dateString);
+
+    //formate the date into a locale specific string
+    //include your locale for better user experience
+    return date.toLocaleDateString("en-US", {timeZone: "UTC"});
+
+} //formatDate
+
+
+//start the app by rendering the past vacations on load if any
+renderPastVacations();
