@@ -1,4 +1,4 @@
-const VERSION = "v2";
+const VERSION = "v3";
 
 //offline resource list
 const APP_STATIC_RESOURCES = [
@@ -90,27 +90,38 @@ self.addEventListener("fetch", (event) => {
     
 }); //fetch
 
-//send a message to the client - we will use to update the data later
-function sendMessageToPWA(message) {
-    self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-            client.postMessage(message);
-        });
-    });
-}
+// //send a message to the client - we will use to update the data later
+// function sendMessageToPWA(message) {
+//     self.clients.matchAll().then((clients) => {
+//         clients.forEach((client) => {
+//             client.postMessage(message);
+//         });
+//     });
+// }
 
-//send a message every 10 seconds
-setInterval(() => {
-    sendMessageToPWA({type: "update", data: "New data available"});
-}, 10000);
+// //send a message every 10 seconds
+// setInterval(() => {
+//     sendMessageToPWA({type: "update", data: "New data available"});
+// }, 10000);
 
-//listen for message from the app
-self.addEventListener('message', (event) => {
-    console.log("Service worker received a message", event.data);
+// //listen for message from the app
+// self.addEventListener('message', (event) => {
+//     console.log("Service worker received a message", event.data);
 
-    //you can respond back if needed
-    event.source.postMessage({
-        type: "response",
-        data: "Message received by sw",
-    });
-});
+//     //you can respond back if needed
+//     event.source.postMessage({
+//         type: "response",
+//         data: "Message received by sw",
+//     });
+// });
+
+//create a broadcast channeh - name here needs to match the name in the app
+const channel = new BroadcastChannel("pwa_channel");
+
+//listen for messages
+channel.onmessage = (event) => {
+    console.log("Received a message in Service Worker: ", event.data);
+
+    //echo the message back to the PWA
+    channel.postMessage("Service worker received: " + event.data);
+};

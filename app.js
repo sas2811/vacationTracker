@@ -135,24 +135,40 @@ if ("serviceWork" in navigator){
     });
 }
 
-//listen for messages from service worker
-navigator.serviceWorker.addEventListener("message", (event) => {
-    console.log("Received a message from the service worker: ", event.data);
+// //listen for messages from service worker
+// navigator.serviceWorker.addEventListener("message", (event) => {
+//     console.log("Received a message from the service worker: ", event.data);
 
-    //handle diff message types
-    if (event.data.type === "update"){
-        console.log("Update received: ", event.data.data);
-        // update ur UI or perform some action
-    }
-});
+//     //handle diff message types
+//     if (event.data.type === "update"){
+//         console.log("Update received: ", event.data.data);
+//         // update ur UI or perform some action
+//     }
+// });
 
-//function to send a message to the service worker
-function sendMessageToSW(message) {
-    if (navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage(message);
-    }
-}
+// //function to send a message to the service worker
+// function sendMessageToSW(message) {
+//     if (navigator.serviceWorker.controller){
+//         navigator.serviceWorker.controller.postMessage(message);
+//     }
+// }
 
+// document.getElementById('sendButton').addEventListener("click", () => {
+//     sendMessageToSW({type: "action", data: "Button clicked"});
+// });
+
+//create a broadcast channeh - name here needs to match the name in the sw
+const channel = new BroadcastChannel("pwa_channel");
+
+//listen for messages
+channel.onmessage = (event) => {
+    console.log("Received a message in PWA: ", event.data);
+    document.getElementById('messages').insertAdjacentHTML("beforeend", `<p>Received: ${event.data}</p>`);
+};
+
+//send a message when the button is clicked
 document.getElementById('sendButton').addEventListener("click", () => {
-    sendMessageToSW({type: "action", data: "Button clicked"});
+    const message = "Hellow from PWA!";
+    channel.postMessage(message);
+    console.log("Sent message from PWA: ", message);
 });
