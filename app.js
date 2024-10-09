@@ -122,3 +122,37 @@ function formatDate(dateString){
 
 //start the app by rendering the past vacations on load if any
 renderPastVacations();
+
+
+//register the sw
+if ("serviceWork" in navigator){
+    navigator.serviceWorker.register('sw.js')
+    .then((registration) => {
+        console.log("Service worker registered with scope: ", registration.scope);
+    })
+    .catch((error) => {
+        console.log("Service worker registration failed: ", error);
+    });
+}
+
+//listen for messages from service worker
+navigator.serviceWorker.addEventListener("message", (event) => {
+    console.log("Received a message from the service worker: ", event.data);
+
+    //handle diff message types
+    if (event.data.type === "update"){
+        console.log("Update received: ", event.data.data);
+        // update ur UI or perform some action
+    }
+});
+
+//function to send a message to the service worker
+function sendMessageToSW(message) {
+    if (navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage(message);
+    }
+}
+
+document.getElementById('sendButton').addEventListener("click", () => {
+    sendMessageToSW({type: "action", data: "Button clicked"});
+});

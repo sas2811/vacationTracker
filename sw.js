@@ -1,4 +1,4 @@
-const VERSION = "v1";
+const VERSION = "v2";
 
 //offline resource list
 const APP_STATIC_RESOURCES = [
@@ -89,3 +89,28 @@ self.addEventListener("fetch", (event) => {
     ); //respond with
     
 }); //fetch
+
+//send a message to the client - we will use to update the data later
+function sendMessageToPWA(message) {
+    self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+            client.postMessage(message);
+        });
+    });
+}
+
+//send a message every 10 seconds
+setInterval(() => {
+    sendMessageToPWA({type: "update", data: "New data available"});
+}, 10000);
+
+//listen for message from the app
+self.addEventListener('message', (event) => {
+    console.log("Service worker received a message", event.data);
+
+    //you can respond back if needed
+    event.source.postMessage({
+        type: "response",
+        data: "Message received by sw",
+    });
+});
