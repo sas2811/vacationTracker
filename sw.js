@@ -115,7 +115,7 @@ self.addEventListener("fetch", (event) => {
 //     });
 // });
 
-//create a broadcast channeh - name here needs to match the name in the app
+//-----------create a broadcast channel - name here needs to match the name in the app
 const channel = new BroadcastChannel("pwa_channel");
 
 //listen for messages
@@ -126,7 +126,7 @@ channel.onmessage = (event) => {
     channel.postMessage("Service worker received: " + event.data);
 };
 
-//open or create the database
+//----------------open or create the database----------------
 let db;
 const dbName = "SyncDatabase";
 const request = indexedDB.open(dbName, 1); //name and version needs to match app.js
@@ -148,5 +148,51 @@ self.addEventListener("sync", function (event) {
 });
 
 function sendDataToServer(){
+    return getAllPendingData()
+        .then(function(dataList){
+            return Promise.all(
+                dataList.map(function(item){
+
+                    //simulate sending the data to the server
+
+                    return new Promise((resolve, reject) => { 
+                        setTimeout(() =>{
+                            if (Math.random() > 0.1) { //90% success rate
+                                console.log("data sent successfully: ", item.data);
+                                resolve(item.id);
+                            } 
+                            else {
+                                console.log("Failed to send data: ", item.data);
+                                reject (new Error("Failed to send data"));
+                            }
+                        }, 1000); //set timeout
+                    }) //return new PromiseRejectionEvent
+
+                    .then(function(){
+                        //if successful, remove item from database
+                        return removeDataFromIndexedDB(item.id);
+                    }); //.then(function())
+
+                }) //map
+            ) //return promise.all
+        }) //.then function(dataList)
 
 } //sendDataToServer
+
+function getAllPendingData(){
+    return new Promise((resolve, reject) => {
+        //transaction to read data from db
+        const transaction = db.transaction(['pendingData'], "readonly");
+        const objectStore = transaction.objectStore("pendingData");
+        const request = objectStore.getAll();
+
+        request.onsuccess = function(event) {
+            resolve(event.target.result); //send back data in db (will be dataList in sendDataToServer)
+        };
+
+        request.onerror = function(event) {
+            reject("Error fetching data: " + event.target.error); //send back error
+        }
+
+    }); // return promise
+} //get all pending data
