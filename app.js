@@ -168,7 +168,7 @@ channel.onmessage = (event) => {
 
 //send a message when the button is clicked
 document.getElementById('sendButton').addEventListener("click", () => {
-    const message = "Hellow from PWA!";
+    const message = "Hello from PWA!";
     channel.postMessage(message);
     console.log("Sent message from PWA: ", message);
 });
